@@ -8,41 +8,35 @@ Email:              christian@kremer.systems
 #>
 
 Import-Module VMware.VimAutomation.Core
-$params = @{
+$vcsaparams = @{
 	#vcsa fqdn or ip address
-	vcsa        = ""
+	Server        = ""
 	#vcenter user
-	user        = ""
+	Username       = ""
 	# password for vcenter user
-	pass        = ""
-	# refreshtimer
-	refreshtime = "10"
-	# URI incoming webhook teams channel
-	uri         = ""
+	Password       = ""
 }
 
+$teamsparams = @{
+	# Teams weebhook uri
+	URI         = ''
+	Method      = 'POST'
+	ContentType = 'application/json'
+}
 Function Get-RunningTask {
 	param(
-		[parameter(Mandatory = $true, HelpMessage = "vcsa ip address or fqdn")]
+		[CmdletBinding(SupportsShouldProcess = $False)]
+		[parameter(Mandatory = $true, HelpMessage = 'vcsaparameters')]
 		[ValidateNotNullorEmpty()]
-		[string] $vcsa,
-		[parameter(Mandatory = $true, HelpMessage = "@vsphere.local user")]
+		[hashtable] $vcsaparameters,
+		[parameter(Mandatory = $true, HelpMessage = 'Teamsparameters')]
 		[ValidateNotNullorEmpty()]
-		[string] $user,
-		[parameter(Mandatory = $true, HelpMessage = "@vsphere.local user password")]
-		[ValidateNotNullorEmpty()]
-		[string]$pass,
-		[parameter(Mandatory = $true, HelpMessage = "refresh timer")]
-		[ValidateNotNullorEmpty()]
-		[string]$refreshtime,
-		[parameter(Mandatory = $true, HelpMessage = "teams incoming webhook url")]
-		[ValidateNotNullorEmpty()]
-		[string]$uri
+		[hashtable] $Teamsparameters
 	)
 
-	Connect-VIServer -Server $vcsa -user $user -pass $pass
+	Connect-VIServer @vcsaparams
 	do {
-		start-sleep -Seconds $refreshtime
+		start-sleep -Seconds "10"
 		$runningtask = Get-Task | where-object { $_.name -like "*vmotion*" } | select-object -Property Name, PercentComplete, State, StartTime
 
 		$textbody = @()
@@ -52,7 +46,7 @@ Function Get-RunningTask {
 
 		write-output $textbody
 
-		$JSONBody = [PSCustomObject][Ordered]@{
+		$TeamsBody = [PSCustomObject][Ordered]@{
 			"@type"      = "MessageCard"
 			"@context"   = "<http://schema.org/extensions>"
 			"summary"    = "vMotion operation progress"
@@ -61,17 +55,10 @@ Function Get-RunningTask {
 			"text"       = $textbody -join "<br>"
 		}
 
-		$TeamsTextBody = ConvertTo-Json $JSONBody
+		$Teamsparameters += @{"Body"=$Teamsbody | ConvertTo-Json}
 
-		$parameters = @{
-			"URI"         = $uri
-			"Method"      = 'POST'
-			"Body"        = $TeamsTextBody
-			"ContentType" = 'application/json'
-		}
-
-		Invoke-RestMethod @parameters
+		Invoke-RestMethod @Teamsparameters
 	} while ($null -ne $runningtask)
 }
 
-Get-RunningTask @params
+Get-RunningTask -vcs $vcsaparams -Teamsparameters $teamsparams
