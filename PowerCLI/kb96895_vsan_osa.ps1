@@ -1,7 +1,7 @@
 <#    
 Script Name:		kb96895_vsan_osa.ps1
 Description:		Intern service script Christian Kremer 
-Data:		        09/Feb/2024
+Data:		        22/Apr/2024
 Version:		    1.0
 Author:			    Christian Kremer
 Email:			    christian@kremer.systems    
