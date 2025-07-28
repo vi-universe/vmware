@@ -13,7 +13,7 @@ set -euo pipefail  # Exit on error, undefined vars, pipe failures
 # ==============================================================================
 
 readonly SCRIPT_NAME="$(basename "$0")"
-readonly LOG_DIR="/var/log/nsx-alb"
+readonly LOG_DIR="/Users/ckremer/Desktop/nsx-alb"
 readonly LOG_FILE="${LOG_DIR}/${SCRIPT_NAME%.*}_$(date +%Y%m%d_%H%M%S).log"
 readonly DEBUG=${DEBUG:-false}
 
@@ -42,20 +42,20 @@ log_debug() { [[ "${DEBUG}" == "true" ]] && log "DEBUG" "$@" || true; }
 # ==============================================================================
 
 # API Connection Settings
-readonly BASE_URL="https://nsx-alb-01a.vi-universe.lab"
-readonly AUTH_HEADER="Authorization: Basic YWRtaW46Vk13YXJlMSFWTXdhcmUxIQ=="
+readonly BASE_URL="https://avi-01a.vi-universe.lab"
+readonly AUTH_HEADER='Authorization: Basic #base64 Auth' 
 readonly COOKIE_HEADER="Cookie: avi-sessionid=None; sessionid=None"
 readonly CONTENT_TYPE="Content-Type: application/json"
-readonly AVI_VERSION_HEADER="X-Avi-Version: 22.1.7"
+readonly AVI_VERSION_HEADER="X-Avi-Version: 31.1.1"
 
 # Common Infrastructure References
 readonly CLOUD_NAME="nsx-01a"
-readonly VRF_NAME="t1-ocp01"
+readonly VRF_NAME="t1-avi-vip"
 readonly CLOUD_REF="/api/cloud?name=${CLOUD_NAME}"
 readonly VRF_REF="/api/vrfcontext?name=${VRF_NAME}"
 
 # Health Monitor Configuration
-readonly MONITOR_NAME="api--ocp-tcp-monitor"
+readonly MONITOR_NAME="script-test-healthmon"
 readonly MONITOR_TYPE="HEALTH_MONITOR_TCP"
 readonly TCP_TIMEOUT=5
 readonly SEND_INTERVAL=10
@@ -65,7 +65,7 @@ readonly FAILED_CHECKS=2
 readonly MONITOR_PORT=0
 
 # Pool Configuration
-readonly POOL_NAME="api--ocp-ingress-https-pool"
+readonly POOL_NAME="script-test-pool"
 readonly DEFAULT_SERVER_PORT=443
 readonly SERVER1_IP="10.0.0.11"
 readonly SERVER2_IP="10.0.0.12"
@@ -74,11 +74,11 @@ readonly LB_ALGORITHM="LB_ALGORITHM_ROUND_ROBIN"
 readonly HEALTH_MONITOR_REF="/api/healthmonitor?name=${MONITOR_NAME}"
 
 # VsVip Configuration
-readonly VSVIP_NAME="api--ocp-int-vsvip"
+readonly VSVIP_NAME="script-test-vsvip"
 readonly VIP_IP_ADDRESS="10.0.0.200"
 
 # Virtual Service Configuration
-readonly VS_NAME="api--ocp-api-vs"
+readonly VS_NAME="script-test-vs"
 readonly VS_TYPE="VS_TYPE_NORMAL"
 readonly VS_PORT=6443
 readonly VS_ENABLE_SSL=false
